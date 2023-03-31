@@ -33,6 +33,19 @@ variable "ecs_cluster_name" {
   default     = "default"
 }
 
+variable "ecs_cluster_new" {
+  type        = bool
+  description = <<-EOT
+      optionally set to false, then no new ecs cluster will be created
+    EOT
+  default     = true
+}
+
+variable "aws_ecs_cluster_containerInsights" {
+  type        = string
+  description = "option to enabled | disabled CloudWatch Container Insights for a cluster"
+  default     = "enabled"
+}
 
 ########################################  configs #######################################
 variable "task_subnet_ids" {
@@ -58,3 +71,28 @@ variable "assign_public_ip" {
   default     = false
 }
 
+variable "desired_count" {
+  type        = number
+  description = "Number of instances of the task definition to place and keep running."
+  default     = 1
+}
+
+variable "ecs_load_balancers" {
+  /*
+  type = list(object({
+    container_name   = string
+    container_port   = number
+    elb_name         = string
+    target_group_arn = string
+  }))
+*/
+  type        = any
+  description = "A list of load balancer config objects for the ECS service; see [ecs_service#load_balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service#load_balancer) docs"
+  default     = []
+}
+
+variable "task_stopped_rule" {
+  type        = bool
+  description = "option to create aws_cloudwatch_event_rule which Trigger when the Fargate task has stopped"
+  default     = false
+}
