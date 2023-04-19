@@ -15,6 +15,11 @@ variable "tags" {
   default     = {}
 }
 
+variable "region" {
+  type    = string
+  default = "us-east-1"
+}
+
 variable "ecs_service_name" {
   type        = string
   description = <<-EOT
@@ -40,6 +45,15 @@ variable "ecs_cluster_new" {
     EOT
   default     = true
 }
+
+variable "ecs_cluster_arn" {
+  type        = string
+  description = <<-EOT
+      provide value if ecs_cluster_new == false
+    EOT
+  default     = null
+}
+
 
 variable "aws_ecs_cluster_containerInsights" {
   type        = string

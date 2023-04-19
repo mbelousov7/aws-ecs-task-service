@@ -1,22 +1,15 @@
 locals {
 
   ecs_cluster_name = var.ecs_cluster_name == "default" ? (
-    "${var.labels.prefix}-${var.labels.stack}-${var.labels.component}-cl-${data.aws_region.current.name}-${var.labels.env}"
+    "${var.labels.prefix}-${var.labels.stack}-${var.labels.component}-cl-${var.region}-${var.labels.env}"
   ) : var.ecs_cluster_name
 
   ecs_service_name = var.ecs_service_name == "default" ? (
     "${var.labels.prefix}-${var.labels.stack}-${var.labels.component}-svc-${var.labels.env}"
   ) : var.ecs_service_name
 
-  ecs_cluster_arn = var.ecs_cluster_new == true ? join("", aws_ecs_cluster.ecs_cluster.*.arn) : join("", data.aws_ecs_cluster.ecs_cluster.*.arn)
+  ecs_cluster_arn = var.ecs_cluster_new == true ? join("", aws_ecs_cluster.ecs_cluster.*.arn) : var.ecs_cluster_arn
 
-}
-
-data "aws_region" "current" {}
-
-data "aws_ecs_cluster" "ecs_cluster" {
-  count        = var.ecs_cluster_new == true ? 0 : 1
-  cluster_name = local.ecs_cluster_name
 }
 
 resource "aws_ecs_cluster" "ecs_cluster" {
@@ -60,6 +53,12 @@ resource "aws_ecs_service" "ecs_service" {
     }
   }
   propagate_tags = "SERVICE"
+
+  tags = merge(
+    var.labels,
+    var.tags,
+    { Name = local.ecs_service_name }
+  )
 }
 
 
