@@ -6,6 +6,10 @@ The build relies on the latest version in this file.
 
 Latest versions must be at the top!
 
+## [1.1.0] - 2023-04-19
+
+- rename input vars
+
 ## [1.0.5] - 2023-03-02
 
 - add task load_balancer dynamic configuration

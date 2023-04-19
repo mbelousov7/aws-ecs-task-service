@@ -48,6 +48,13 @@ variable "aws_ecs_cluster_containerInsights" {
 }
 
 ########################################  configs #######################################
+variable "launch_type" {
+  type        = string
+  description = "The launch type on which to run your service. Valid values are `EC2` and `FARGATE`"
+  default     = "FARGATE"
+}
+
+
 variable "task_subnet_ids" {
   type        = list(string)
   description = "Subnet IDs used in Service `network_configuration`"
@@ -65,17 +72,18 @@ variable "task_security_group_ids" {
   default     = []
 }
 
+variable "task_desired_count" {
+  type        = number
+  description = "Number of instances of the task definition to place and keep running."
+  default     = 1
+}
+
 variable "assign_public_ip" {
   type        = bool
   description = "Assign a public IP address to the ENI (Fargate launch type only). Valid values are `true` or `false`. Default `false`"
   default     = false
 }
 
-variable "desired_count" {
-  type        = number
-  description = "Number of instances of the task definition to place and keep running."
-  default     = 1
-}
 
 variable "ecs_load_balancers" {
   /*

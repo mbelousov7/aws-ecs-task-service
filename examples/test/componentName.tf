@@ -30,11 +30,12 @@ variable "component" {
   default = "componentName"
 }
 
-variable "vpc_config" {
-  default = {
-    vpc_id     = "vpc-change-me-123123"
-    subnet_ids = ["subnet-1234567890"]
-  }
+variable "vpc_id" {
+  default = "vpc-change-me-123123"
+}
+
+variable "subnet_ids" {
+  default = ["subnet-1234567890"]
 }
 
 variable "security_group" {
@@ -109,15 +110,15 @@ locals {
 # - it is better to store vars values in one or two places(<ENV>.tfvars file and variables.tf)
 
 module "ecs_task_security_group" {
-  source        = "git::https://gitlab.com:/mb-terraform-modules/aws-security-group.git?ref=main"
-  vpc_id        = var.vpc_config.vpc_id
+  source        = "git::https://github.com/mbelousov7/aws-security-group.git?ref=v1.0.0"
+  vpc_id        = var.vpc_id
   ingress_rules = var.security_group.ingress_rules
   egress_rules  = var.security_group.egress_rules
   labels        = local.labels
 }
 
 module "ecs_task_definition" {
-  source                      = "git::https://gitlab.com:/mb-terraform-modules/aws-ecs-task-definition.git?ref=main"
+  source                      = "git::https://github.com/mbelousov7/aws-ecs-task-definition.git?ref=v1.0.0"
   aws_region                  = var.region
   container_name              = var.container_name
   container_image             = var.container_image
@@ -128,11 +129,10 @@ module "ecs_task_definition" {
   labels                      = local.labels
 }
 
-
 module "ecs_task_service" {
   source                  = "../.."
   task_definition_arn     = module.ecs_task_definition.task_definition_arn
-  task_subnet_ids         = var.vpc_config.subnet_ids
+  task_subnet_ids         = var.subnet_ids
   task_security_group_ids = [module.ecs_task_security_group.id]
   labels                  = local.labels
 }
