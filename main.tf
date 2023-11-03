@@ -1,14 +1,14 @@
 locals {
 
-  ecs_cluster_name = var.ecs_cluster_name == "default" ? (
+  ecs_cluster_name = var.ecs_cluster_name == "" ? (
     "${var.labels.prefix}-${var.labels.stack}-${var.labels.component}-cl-${var.region}-${var.labels.env}"
   ) : var.ecs_cluster_name
 
-  ecs_service_name = var.ecs_service_name == "default" ? (
+  ecs_service_name = var.ecs_service_name == "" ? (
     "${var.labels.prefix}-${var.labels.stack}-${var.labels.component}-svc-${var.labels.env}"
   ) : var.ecs_service_name
 
-  ecs_cluster_arn = var.ecs_cluster_new == true ? join("", aws_ecs_cluster.ecs_cluster.*.arn) : var.ecs_cluster_arn
+  ecs_cluster_arn = var.ecs_cluster_new == false && var.ecs_cluster_arn != "" ? var.ecs_cluster_arn : join("", aws_ecs_cluster.ecs_cluster.*.arn)
 
 }
 
@@ -28,14 +28,23 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 
 resource "aws_ecs_service" "ecs_service" {
+  timeouts {
+    create = "10m"
+    delete = "10m"
+    update = "10m"
+  }
+
   depends_on = [
     aws_ecs_cluster.ecs_cluster,
   ]
-  name            = local.ecs_service_name
-  cluster         = local.ecs_cluster_arn
-  task_definition = var.task_definition_arn
-  desired_count   = var.task_desired_count
-  launch_type     = var.launch_type
+  name                               = local.ecs_service_name
+  cluster                            = local.ecs_cluster_arn
+  task_definition                    = var.task_definition_arn
+  desired_count                      = var.task_desired_count
+  launch_type                        = var.launch_type
+  deployment_maximum_percent         = var.deployment_maximum_percent
+  deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
+  wait_for_steady_state              = var.wait_for_steady_state
 
   network_configuration {
     subnets          = var.task_subnet_ids
@@ -52,6 +61,17 @@ resource "aws_ecs_service" "ecs_service" {
       target_group_arn = lookup(load_balancer.value, "target_group_arn", null)
     }
   }
+
+  dynamic "service_registries" {
+    for_each = var.service_registries
+    content {
+      registry_arn   = service_registries.value.registry_arn
+      port           = lookup(service_registries.value, "port", null)
+      container_name = lookup(service_registries.value, "container_name", null)
+      container_port = lookup(service_registries.value, "container_port", null)
+    }
+  }
+
   propagate_tags = "SERVICE"
 
   tags = merge(

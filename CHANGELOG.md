@@ -6,6 +6,17 @@ The build relies on the latest version in this file.
 
 Latest versions must be at the top!
 
+## [1.1.2] - 2023-09-14
+
+- add cpu, memory, running task count alarms
+- add log metrics and alarms
+
+## [1.1.1] - 2023-07-11
+
+- add service_registries variable for service discovery
+- add wait_for_steady_state variable
+- add deployment_maximum_percent and deployment_minimum_healthy_percent variables
+
 ## [1.1.0] - 2023-04-19
 
 - rename input vars
